@@ -32,62 +32,41 @@ class Assignment:
         return f"Time Remaining : {self.time_to_completion} hours out of {self.total_time} \n {self.percentage_complete():.2f}% complete"
 
 
-
-#Decorator component
+#Template Pattern
 class Activity(ABC):
 
-    @abstractmethod
+    # This is the template method
+    def activity(self, time):
+        self.time = time
+        self.effect = {}
+        self.set_effect()
+        self.get_effect()
+        self.get_time()
+
     def get_effect(self):
-        pass
+        return self.effect
+
+    def get_time(self):
+        return self.time
 
     @abstractmethod
-    def get_time(self):
+    def set_effect(self):
         pass
 
 
-#concrete component
 class SimpleActivity(Activity):
-    def __init__(self,time=0):
+    def set_effect(self):
         self.effect = {'anxiety': 0, 'efficiency': 0, 'health': 0}
-        self.time = time
-
-    def get_effect(self):
-        return self.effect
-
-    def get_time(self):
-        return self.time
 
 
-#Decorator
 class TaxingActivity(Activity):
-    def __init__(self, time=0):
-        self.effect = {'anxiety': 0, 'efficiency': 0, 'health': 0}
-        self.time = time
-
-    def get_effect(self):
-        self.effect['anxiety'] += 1
-        self.effect['efficiency'] -= 1
-        self.effect['health'] -= 1
-        return self.effect
-
-    def get_time(self):
-        return self.time
+    def set_effect(self):
+        self.effect = {'anxiety': 1, 'efficiency': -1, 'health': -1}
 
 
-#Decorator
 class RejuvenatingActivity(Activity):
-    def __init__(self, time=0):
-        self.effect = {'anxiety': 0, 'efficiency': 0, 'health': 0}
-        self.time = time
-
-    def get_effect(self):
-        self.effect['anxiety'] -= 1
-        self.effect['efficiency'] += 1
-        self.effect['health'] += 1
-        return self.effect
-
-    def get_time(self):
-        return self.time
+    def set_effect(self):
+        self.effect = {'anxiety': -1, 'efficiency': 1, 'health': 1}
 
 
 class Health:
@@ -140,11 +119,17 @@ class Schedule:
 
     def add_activity(self, day, activity, duration, effect):
         if effect == 'taxing':
-            self.activities[day].append(TaxingActivity(duration))
+            ta = TaxingActivity()
+            ta.activity(duration)
+            self.activities[day].append(ta)
         elif effect == 'rejuvenating':
-            self.activities[day].append(RejuvenatingActivity(duration))
+            ra = RejuvenatingActivity()
+            ra.activity(duration)
+            self.activities[day].append(ra)
         else:
-            self.activities[day].append(SimpleActivity(duration))
+            sa = SimpleActivity()
+            sa.activity(duration)
+            self.activities[day].append(sa)
 
     def remove_activity(self, day, activity):
         self.activities[day][activity] = 0
